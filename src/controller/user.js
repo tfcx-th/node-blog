@@ -1,6 +1,10 @@
+const { exec } = require("../db/mysql")
+
 const loginCheck = (username, password) => {
-    // mock
-    return username === 'tfcx' && password === '123456';
+    let sql = `SELECT user_name, user_real_name 
+               FROM user_info
+               WHERE user_name='${username}' AND user_password='${password}'`
+    return exec(sql).then(rows => rows[0] || {})
 }
 
 module.exports = {

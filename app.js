@@ -34,20 +34,33 @@ const serverHandle = (req, res) => {
     req.path = url.split('?')[0]
     req.query = querystring.parse(url.split('?')[1])
 
+    // handle cookies
+    req.cookie = {}
+    const cookieStr = req.headers.cookie || ''
+    cookieStr.split(';').forEach(item => {
+        if (!item) return
+        [ key, val ] = item.split('=')
+        req.cookie[key] = val
+    })
+
     getPostData(req).then(postData => {
         req.body = postData
 
         // handle blog routers
-        const blogData = handleBlogRouter(req, res)
-        if (blogData) {
-            res.end(JSON.stringify(blogData))
+        const blogResult = handleBlogRouter(req, res)
+        if (blogResult) {
+            blogResult.then(blogData => {
+                res.end(JSON.stringify(blogData))
+            }).catch(err => console.error(err))
             return
         }
 
         // handle user routers
-        const userData = handleUserRouter(req, res)
-        if (userData) {
-            res.end(JSON.stringify(userData))
+        const userResult = handleUserRouter(req, res)
+        if (userResult) {
+            userResult.then(userData => {
+                res.end(JSON.stringify(userData))
+            }).catch(err => console.error(err))
             return
         }
 

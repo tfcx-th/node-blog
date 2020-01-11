@@ -3,38 +3,50 @@ const { getList, getDetail, newBlog, updateBlog, deleteBlog } = require('../cont
 
 const handleBlogRouter = (req, res) => {
     const method = req.method
-    const id = req.query.id
 
     // 获取博客列表
     if (method === 'GET' && req.path === '/api/blog/list') {
         const author = req.query.author || ''
         const keyword = req.query.keyword || ''
-        const listData = getList(author, keyword)
-        return new SuccessModel(listData)
+        console.log(1)
+        return getList(author, keyword).then(listData => {
+            return new SuccessModel(listData)
+        })
     }
 
     // 获取博客详情
     if (method === 'GET' && req.path === '/api/blog/detail') {
-        const detailData = getDetail(id)
-        return new SuccessModel(detailData)
+        const id = req.query.id
+        return getDetail(id).then(detailData => {
+            return new SuccessModel((detailData))
+        })
     }
 
     // 新建博客
     if (method === 'POST' && req.path === '/api/blog/new') {
-        const blogData = newBlog(req.body)
-        return new SuccessModel(blogData)
+        // TODO: mock data
+        req.body.author = 'tfcx'
+        return newBlog(req.body).then(data => {
+            return new SuccessModel(data)
+        })
     }
 
     // 更新博客
     if (method === 'POST' && req.path === '/api/blog/update') {
-        const updateReslut = updateBlog(id, req.body)
-        return updateReslut ? new SuccessModel() : new ErrorModel('failed')
+        const id = req.query.id
+        return updateBlog(id, req.body).then(result => {
+            return result ? new SuccessModel() : new ErrorModel('update failed')
+        })
     }
 
     // 删除博客
     if (method === 'POST' && req.path === '/api/blog/del') {
-        const deleteResult = deleteBlog(id)
-        return deleteResult ? new SuccessModel() : new ErrorModel('failed')
+        // TODO: mock data
+        const author = 'tfcx'
+        const id = req.query.id
+        return deleteBlog(id, author).then(result => {
+            return result ? new SuccessModel() : new ErrorModel('update failed')
+        })
     }
 }
 

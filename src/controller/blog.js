@@ -1,60 +1,54 @@
+const { exec } = require("../db/mysql")
+
 const getList = (author, keyword) => {
-    // mock data
-    return [
-        {
-            id: 1,
-            title: 'title_a',
-            content: 'content_a',
-            create_time: 1577714271068,
-            author: 'a'
-        },
-        {
-            id: 2,
-            title: 'title_b',
-            content: 'content_b',
-            create_time: 1577714271268,
-            author: 'b'
-        },
-        {
-            id: 3,
-            title: 'title_c',
-            content: 'content_c',
-            create_time: 1577714771068,
-            author: 'c'
-        }
-    ]
+    let sql = `SELECT * FROM blog_list WHERE 1=1 `
+    if (author) {
+        sql += `AND blog_author='${author}' `
+    }
+    if (keyword) {
+        sql += `AND blog_title like '%${keyword}%' `
+    }
+    sql += 'ORDER BY create_time desc'
+    return exec(sql)
 }
 
 const getDetail = id => {
-    // mock data
-    return {
-        id: 1,
-        title: 'title_a',
-        content: 'content_a',
-        create_time: 1577714271068,
-        author: 'a'
-    }
+    let sql = `SELECT * FROM blog_list WHERE blog_id=${id}`
+    return exec(sql).then(rows => {
+        return rows[0]
+    })
 }
 
 // blogData = { title: '', content: '' }
 const newBlog = (blogData = {}) => {
-    console.log(blogData)
-    // mock data
-    return {
-        id: 4
-    }
+    const { title, content, author } = blogData
+    const createtime = Date.now()
+
+    let sql = `INSERT INTO blog_list (blog_title, blog_content, create_time, blog_author)
+        values ('${title}', '${content}', ${createtime}, '${author}')`
+
+    return exec(sql).then(insertData => {
+        return {
+            id: insertData.insertId
+        }
+    })
 }
 
 const updateBlog = (id, blogData = {}) => {
-    console.log(id, blogData)
-    // mock data
-    return false
+    const { title, content } = blogData
+
+    let sql = `UPDATE blog_list SET blog_title='${title}', blog_content='${content}' WHERE blog_id=${id}`
+
+    return exec(sql).then(updateData => {
+        return !!updateData.affectedRows
+    })
 }
 
-const deleteBlog = id => {
-    console.log(id)
-    // mock data
-    return true
+const deleteBlog = (id, author) => {
+    let sql = `DELETE FROM blog_list WHERE blog_id=${id} AND blog_author='${author}'`
+    return exec(sql).then(deleteData => {
+        return !!deleteData.affectedRows
+    })
 }
 
 module.exports = {

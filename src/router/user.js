@@ -7,7 +7,9 @@ const handleUserRouter = (req, res) => {
     // login
     if (method === 'POST' && req.path === '/api/user/login') {
         const { username, password } = req.body
-        return loginCheck(username, password) ? new SuccessModel() : new ErrorModel('login failed')
+        return loginCheck(username, password).then(data => {
+            return data.user_name ? new SuccessModel() : new ErrorModel('login failed')
+        })
     }
 }
 
