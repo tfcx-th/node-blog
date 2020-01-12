@@ -1,6 +1,13 @@
 const { SuccessModel, ErrorModel } = require('../model/resModel')
 const { getList, getDetail, newBlog, updateBlog, deleteBlog } = require('../controller/blog')
 
+// 登录验证
+const loginCheck = req => {
+    if (!req.session.username) {
+        return Promise.resolve(new ErrorModel('not login'))
+    }
+}
+
 const handleBlogRouter = (req, res) => {
     const method = req.method
 
@@ -23,8 +30,8 @@ const handleBlogRouter = (req, res) => {
 
     // 新建博客
     if (method === 'POST' && req.path === '/api/blog/new') {
-        // TODO: mock data
-        req.body.author = 'tfcx'
+        if (loginCheck(req)) return loginCheck
+        req.body.author = req.session.username
         return newBlog(req.body).then(data => {
             return new SuccessModel(data)
         })
@@ -32,6 +39,7 @@ const handleBlogRouter = (req, res) => {
 
     // 更新博客
     if (method === 'POST' && req.path === '/api/blog/update') {
+        if (loginCheck(req)) return loginCheck
         const id = req.query.id
         return updateBlog(id, req.body).then(result => {
             return result ? new SuccessModel() : new ErrorModel('update failed')
@@ -40,8 +48,8 @@ const handleBlogRouter = (req, res) => {
 
     // 删除博客
     if (method === 'POST' && req.path === '/api/blog/del') {
-        // TODO: mock data
-        const author = 'tfcx'
+        if (loginCheck(req)) return loginCheck
+        const author = req.session.username
         const id = req.query.id
         return deleteBlog(id, author).then(result => {
             return result ? new SuccessModel() : new ErrorModel('update failed')
