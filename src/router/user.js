@@ -1,15 +1,29 @@
 const { SuccessModel, ErrorModel } = require('../model/resModel')
-const { loginCheck } = require('../controller/user')
+const { login } = require('../controller/user')
 
 const handleUserRouter = (req, res) => {
     const method = req.method
 
     // login
-    if (method === 'POST' && req.path === '/api/user/login') {
-        const { username, password } = req.body
-        return loginCheck(username, password).then(data => {
-            return data.user_name ? new SuccessModel() : new ErrorModel('login failed')
+    if (method === 'GET' && req.path === '/api/user/login') {
+        // const { username, password } = req.body
+        const { username, password } = req.query
+        return login(username, password).then(data => {
+            if (data.user_name) {
+                // set session
+                req.session.username = data.user_name
+                req.session.realName = data.user_real_name
+                return new SuccessModel()
+            }
+            return new ErrorModel('login failed')
         })
+    }
+
+    // login check
+    if (method === 'GET' && req.path === '/api/user/logintest') {
+        return Promise.resolve( req.session.username ? new SuccessModel({
+            session: req.session
+        }) : new ErrorModel('login failed'))
     }
 }
 
